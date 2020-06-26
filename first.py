@@ -1,7 +1,7 @@
-#bugg
+#buggs:
 #cannot move diagonaly
 # i thought we fixed this
-#fix 
+#fix:
 #use both keys to move at once
 
 
@@ -12,6 +12,9 @@ import pygame.freetype
 from pygame import sprite
 from pygame import rect
 import random
+pygame.init
+pygame.mixer.init()
+
 
 fallen_trees = 0
 
@@ -19,26 +22,15 @@ spawn_x= random.randint (1,500)
 spawn_y= random.randint (1,500)
 
 
-
+chop_sound = pygame.mixer.Sound("crash.wav")
 
 startup = True
 
 
-while startup:
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	break
+def chop():
+    ####################################
+    pygame.mixer.Sound.play(crash_sound)
+    pygame.mixer.music.stop()
 
 
 class Player:
@@ -238,7 +230,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        print('chop')
+                        chop()
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
