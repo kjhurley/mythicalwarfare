@@ -1,12 +1,24 @@
+#bugg
+#cannot move diagonaly
+# i thought we fixed this
+#fix 
+#use both keys to move at once
+
+
+
+
 import pygame
 import pygame.freetype
-from pygame.sprite import sprite
+from pygame import sprite
+from pygame import rect
 import random
 
 fallen_trees = 0
 
 spawn_x= random.randint (1,500)
 spawn_y= random.randint (1,500)
+
+
 
 
 startup = True
