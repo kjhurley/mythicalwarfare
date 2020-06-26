@@ -1,2 +1,2 @@
-language = "pygame"
+guage = "pygame"
 run = "python first.py"

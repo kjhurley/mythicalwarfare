@@ -1,4 +1,6 @@
 import pygame
+import pygame.freetype
+from pygame.sprite import sprite
 import random
 
 fallen_trees = 0
@@ -7,10 +9,24 @@ spawn_x= random.randint (1,500)
 spawn_y= random.randint (1,500)
 
 
+startup = True
 
 
-
-
+while startup:
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	break
 
 
 class Player:
