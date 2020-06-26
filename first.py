@@ -135,7 +135,10 @@ class Tree:
                     self.fallen = True
                 return True
 
-
+class Rock(Tree):
+	def is_chopped(self, click_pos):
+		"""rocks cant be chopped"""
+		return False
 
 pygame.init()
 max_x = 500
