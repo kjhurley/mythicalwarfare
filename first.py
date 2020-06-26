@@ -136,9 +136,28 @@ class Tree:
                 return True
 
 class Rock(Tree):
-	def is_chopped(self, click_pos):
-		"""rocks cant be chopped"""
-		return False
+    COLOUR = 0xd3d3d3
+    def __init__(self, pos, radius):
+        super().__init__(pos, radius)
+        self.r = radius
+
+    def draw(self, win, player):
+        screen_x, screen_y = player.screen_coord((self.x, self.y))
+
+        if not self.fallen:
+            pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
+
+    def is_colliding(self, pos, radius):
+        """True if circle at pos of given radius is touching"""
+        if self.overlaps(pos, radius + self.r):
+            return True
+        else:
+            return False
+
+    def is_chopped(self, click_pos):
+        """rocks cant be chopped"""
+        return False
+
 
 pygame.init()
 max_x = 500
@@ -162,6 +181,13 @@ for i in range(50):
     new_tree = Tree(tree1_pos, radius)
     if not new_tree.is_colliding(player.coord(), radius):
         trees.append(new_tree)
+        
+rocks = []
+for i in range(1000):
+    rock1_pos = (random.randint(-2000, 2000), random.randint(-2000, 2000))
+    new_rock = Rock(rock1_pos, 5)
+    if not new_rock.is_colliding(player.coord(), radius):
+        rocks.append(new_rock)
 
 inventory_display = False
 
@@ -221,6 +247,8 @@ while run:
     player.draw(win)
     for tree in trees:
         tree.draw(win, player)
+    for rock in rocks:
+        rock.draw(win, player)
 
     pygame.display.update()
 
