@@ -17,7 +17,7 @@ import random
 pygame.init
 pygame.font.init()
 
-chop_sound = pygame.mixer.Sound("crash.wav")
+
 
 font= pygame.font.SysFont(None, 25)
 def message_to_screen(msg,color,pos):
@@ -269,9 +269,17 @@ while startup:
 	button.click()
 	if button.clicked:
 		startup= False
+	message_to_screen('MYTHICAL WARFAIR', (250, 0, 0), (159, 120))
 	button.draw()
 	button.message('start')
 	pygame.display.update()
+
+
+def draw_crafting_grid():
+	pygame.draw.rect(win, (128,128,128), (250, 0), (50, 50))
+	pygame.draw.rect(win, (128,128,128), (200, 0), (50, 50))
+	pygame.draw.rect(win, (128,128,128), (250, 50), (50, 50))
+	pygame.draw.rect(win, (128,128,128), (200, 50), (50, 50))
 
 
 
