@@ -269,7 +269,7 @@ while startup:
 	button.click()
 	if button.clicked:
 		startup= False
-	message_to_screen('MYTHICAL WARFARe', (250, 0, 0), (159, 120))
+	message_to_screen('MYTHICAL WARFARE', (250, 0, 0), (159, 120))
 	button.draw()
 	button.message('start')
 	pygame.display.update()
