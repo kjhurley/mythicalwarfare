@@ -1,4 +1,4 @@
-pygame.display.update()
+pygame.mixer.init
 chop_sound = pygame.mixer.Sound("crash.wav")
 def chop():
     ####################################

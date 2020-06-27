@@ -11,19 +11,32 @@ import pygame
 from pygame import sprite
 from pygame import rect
 import random
+pygame.mixer.init
 
 
 pygame.init
 pygame.font.init()
 
-
+chop_sound = pygame.mixer.Sound("crash.wav")
 
 font= pygame.font.SysFont(None, 25)
 def message_to_screen(msg,color,pos):
 	screen_text= font.render(msg, True, color)
 	win.blit(screen_text, (pos))
 
+
+def chop():
+    ####################################
+    pygame.mixer.Sound.play(chop_sound)
+    pygame.mixer.music.stop()
+
+
+
 button_click= 0
+
+
+
+
 
 class Button:
 	def __init__(self):
@@ -278,7 +291,12 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.K_ESCAPE:
-            run = False
+            	button.click()
+            	if button.clicked:
+            		startup= False
+            	button.draw()
+            	button.message('quit')
+            	pygame.time.delay(1000000)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
                 if player.v < max_x/2:
@@ -291,7 +309,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        print('chop')
+                        chop()
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
