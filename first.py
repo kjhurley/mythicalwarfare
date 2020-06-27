@@ -8,12 +8,11 @@
 
 
 import pygame
-import pygame.freetype
 from pygame import sprite
 from pygame import rect
 import random
 pygame.init
-pygame.freetype.init()
+pygame.font.init()
 pygame.mixer.init
 
 
@@ -27,8 +26,8 @@ game_start= 0
 
 startup = True
 
-chop_sound = pygame.mixer.Sound("crash.wav")
-GAME_FONT = pygame.freetype.Font(, 24)
+
+
 
 class button():
 		def draw():
@@ -43,13 +42,15 @@ class button():
 					startup= False
 
 		def button_text():
+			font= pygame.font.sysfont(None, 25)
 			text= ('start')
-			GAME_FONT.render_to(win, (40, 350), (text), (0, 0, 0))
+			
+font= pygame.font.SysFont(None, 25)
+def message_to_screen(msg,color):
+	screen_text= font.render(msg, True, color)
+	win.blit(screen_text, [250, 250])
 
-def chop():
-    ####################################
-    pygame.mixer.Sound.play(chop_sound)
-    pygame.mixer.music.stop()
+
 
 
 
@@ -233,25 +234,16 @@ for i in range(1000):
 inventory_display = False
 
 
-while startup:
-	
 run = True
+	
+
 while run:
     pygame.time.delay(50)
-		while startup:
-			button.draw()
-			button.click_button()
-			button.button_text
-
-
-
-
-
-
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+				if event.type == pygame.K_ESCAPE:
+					run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
                 if player.v < max_x/2:
@@ -264,7 +256,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        chop()
+                        print('chop')
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
@@ -307,4 +299,8 @@ while run:
     pygame.display.update()
 
 
+
+message_to_screen('Why are you leaving?', [255, 0, 0])
+pygame.display.update()
+pygame.time.delay(3000)
 pygame.quit()
