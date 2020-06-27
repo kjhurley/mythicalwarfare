@@ -11,7 +11,7 @@ import pygame
 from pygame import sprite
 from pygame import rect
 import random
-pygame.mixer.init
+
 
 
 pygame.init
@@ -25,10 +25,6 @@ def message_to_screen(msg,color,pos):
 	win.blit(screen_text, (pos))
 
 
-def chop():
-    ####################################
-    pygame.mixer.Sound.play(chop_sound)
-    pygame.mixer.music.stop()
 
 
 
@@ -309,7 +305,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        chop()
+                        print('chop')
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
