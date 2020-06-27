@@ -13,24 +13,45 @@ from pygame import sprite
 from pygame import rect
 import random
 pygame.init
-pygame.mixer.init()
+pygame.freetype.init()
+pygame.mixer.init
 
 
 fallen_trees = 0
 
 spawn_x= random.randint (1,500)
 spawn_y= random.randint (1,500)
+game_start= 0
 
 
-chop_sound = pygame.mixer.Sound("crash.wav")
 
 startup = True
 
+chop_sound = pygame.mixer.Sound("crash.wav")
+GAME_FONT = pygame.freetype.Font(, 24)
+
+class button():
+		def draw():
+		 couler= (255, 0, 0)
+		 button= pygame.draw.rect(win, (couler), (250, 250, 7, 3))
+		def click_button():
+			pygame.event.get()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				click = button.collidepont(pygame.mouse.get_pos())
+				if click == 1:
+					couler= (0, 255, 0)
+					startup= False
+
+		def button_text():
+			text= ('start')
+			GAME_FONT.render_to(win, (40, 350), (text), (0, 0, 0))
 
 def chop():
     ####################################
-    pygame.mixer.Sound.play(crash_sound)
+    pygame.mixer.Sound.play(chop_sound)
     pygame.mixer.music.stop()
+
+
 
 
 class Player:
@@ -211,9 +232,22 @@ for i in range(1000):
 
 inventory_display = False
 
+
+while startup:
+	
 run = True
 while run:
     pygame.time.delay(50)
+		while startup:
+			button.draw()
+			button.click_button()
+			button.button_text
+
+
+
+
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
