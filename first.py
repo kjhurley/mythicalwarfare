@@ -33,11 +33,18 @@ def chop():
     pygame.mixer.Sound.play(chop_sound)
     pygame.mixer.music.stop()
 
+font= pygame.font.SysFont(None, 25)
+def message_to_screen(msg,color,pos):
+	screen_text= font.render(msg, True, color)
+	win.blit(screen_text, [pos])
+
+
 
 class button():
 		def draw():
 		 couler= (255, 0, 0)
-		 button= pygame.draw.rect(win, (couler), (250, 250, 7, 3))
+		 button_pos= 250
+		 button= pygame.draw.rect(win, (couler), (button_pos, button_pos, 20, 5))
 		def click_button():
 			pygame.event.get()
 			if event.type == pygame.MOUSEBUTTONDOWN:
@@ -45,15 +52,11 @@ class button():
 				if click == 1:
 					couler= (0, 255, 0)
 					startup= False
+		def button_message():
+			message_to_screen('start', [0, 0, 0], [button_pos, button_pos])
 
-		def button_text():
-			font= pygame.font.sysfont(None, 25)
-			text= ('start')
 			
-font= pygame.font.SysFont(None, 25)
-def message_to_screen(msg,color):
-	screen_text= font.render(msg, True, color)
-	win.blit(screen_text, [250, 250])
+
 
 
 
@@ -134,6 +137,14 @@ class Player:
             return True
         else:
             return False
+
+
+
+
+
+
+
+
 
 
 class Tree:
@@ -239,6 +250,17 @@ for i in range(1000):
 inventory_display = False
 
 
+
+while startup:
+	button.draw
+	button.click_button
+	button.button_message
+	pygame.display.update()
+
+
+
+
+
 run = True
 	
 
@@ -305,7 +327,7 @@ while run:
 
 
 
-message_to_screen('Why are you leaving?', [255, 0, 0])
+message_to_screen('Why are you leaving?', [255, 0, 0], [250, 250])
 pygame.display.update()
 pygame.time.delay(3000)
 pygame.quit()
