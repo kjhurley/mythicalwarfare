@@ -16,6 +16,8 @@ pygame.font.init()
 pygame.mixer.init
 
 
+chop_sound = pygame.mixer.Sound("crash.wav")
+
 fallen_trees = 0
 
 spawn_x= random.randint (1,500)
@@ -26,7 +28,10 @@ game_start= 0
 
 startup = True
 
-
+def chop():
+    ####################################
+    pygame.mixer.Sound.play(chop_sound)
+    pygame.mixer.music.stop()
 
 
 class button():
@@ -256,7 +261,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        print('chop')
+                        chop()
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
