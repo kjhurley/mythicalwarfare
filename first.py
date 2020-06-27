@@ -11,49 +11,41 @@ import pygame
 from pygame import sprite
 from pygame import rect
 import random
+
+
 pygame.init
 pygame.font.init()
-pygame.mixer.init
 
 
-chop_sound = pygame.mixer.Sound("crash.wav")
-
-fallen_trees = 0
-
-spawn_x= random.randint (1,500)
-spawn_y= random.randint (1,500)
-game_start= 0
-
-
-
-startup = True
-
-def chop():
-    ####################################
-    pygame.mixer.Sound.play(chop_sound)
-    pygame.mixer.music.stop()
 
 font= pygame.font.SysFont(None, 25)
 def message_to_screen(msg,color,pos):
 	screen_text= font.render(msg, True, color)
-	win.blit(screen_text, [pos])
+	win.blit(screen_text, (pos))
 
+button_click= 0
 
+class Button:
+	def __init__(self):
+		self.colour = (255, 0, 0)
+		self.position = 250
+		self.rect_coords = (self.position, self.position, 50, 30)
+		self.rect = None
+		self.clicked = False
 
-class button():
-		def draw():
-		 couler= (255, 0, 0)
-		 button_pos= 250
-		 button= pygame.draw.rect(win, (couler), (button_pos, button_pos, 20, 5))
-		def click_button():
-			pygame.event.get()
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				click = button.collidepont(pygame.mouse.get_pos())
-				if click == 1:
-					couler= (0, 255, 0)
-					startup= False
-		def button_message():
-			message_to_screen('start', [0, 0, 0], [button_pos, button_pos])
+	def draw(self):
+		 self.rect = pygame.draw.rect(win, self.colour, self.rect_coords)
+
+	def click(self):
+		 for event in pygame.event.get():
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					click = self.rect.collidepoint(pygame.mouse.get_pos())
+					if click == 1:
+						self.colour = (0, 0, 255)
+						self.clicked = True
+
+	def message(self, msg):
+			message_to_screen(msg, [0, 0, 0], [255, 255])
 
 			
 
@@ -251,14 +243,30 @@ inventory_display = False
 
 
 
+fallen_trees = 0
+
+spawn_x= random.randint (1,500)
+spawn_y= random.randint (1,500)
+game_start= 0
+
+print('show startup button')
+
+startup = True
+
+button = Button()
+
 while startup:
-	button.draw
-	button.click_button
-	button.button_message
+	pygame.time.delay(100)
+	button.click()
+	if button.clicked:
+		startup= False
+	button.draw()
+	button.message('start')
 	pygame.display.update()
 
 
 
+print('starting')
 
 
 run = True
@@ -269,8 +277,8 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-				if event.type == pygame.K_ESCAPE:
-					run = False
+        if event.type == pygame.K_ESCAPE:
+            run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
                 if player.v < max_x/2:
@@ -283,7 +291,7 @@ while run:
                 map_pos = player.map_coord(mouse_pos)
                 for tree in trees:
                     if tree.is_chopped(map_pos):
-                        chop()
+                        print('chop')
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
