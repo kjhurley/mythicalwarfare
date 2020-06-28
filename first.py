@@ -10,11 +10,13 @@
 import pygame
 from pygame import sprite
 from pygame import rect
+import pygame.math
+import math
 import random
 
 
 
-pygame.init
+pygame.init()
 pygame.font.init()
 
 
@@ -30,8 +32,58 @@ def message_to_screen(msg,color,pos):
 
 button_click= 0
 
+class Zombie(pygame.sprite.Sprite):
+    def __init__(self, coord):
+        super().__init__()
+        #self.colour = (0x98, 0xfb, 0x98)  # pale green
+        self.colour = (0xff, 0xff, 0xff) # white
+        self.width = 10
+        self.height = 10
+        self.x, self.y = coord
 
+        self.screen_pos = pygame.math.Vector2(0, 0)
 
+        self.image = pygame.Surface([self.width, self.height])
+        pygame.draw.rect(self.image, self.colour, [0, 0, self.width, self.height])
+        self.rect = self.image.get_rect()
+
+        # max speed of zombie
+        self.velocity = pygame.math.Vector2(0.2, 0)
+
+        self.hp = 3
+        self.killed = False
+        self.player_hit_count = 0
+        self.visible_range = 100 # zombies can't see very well
+
+    def update_screen_pos(self, player):
+        """given player, update zombie screen coordinates"""
+        self.screen_pos = pygame.math.Vector2(player.screen_coord((self.x, self.y)))
+        self.rect = self.image.get_rect(x=self.screen_pos.x, y=self.screen_pos.y)
+
+    def update(self, player):
+        """move toward the player"""
+        pos = pygame.math.Vector2(self.x, self.y)
+        player_pos = pygame.math.Vector2((player.x, player.y))
+        player_screen_pos = pygame.math.Vector2(player.player_screen_coord())
+
+        if not self.rect.collidepoint((player_screen_pos.x, player_screen_pos.y)):
+            if pos.distance_to(player_pos) < self.visible_range:
+                angle = pos.angle_to(player_pos)
+                move = self.velocity.rotate(angle)
+                pos += move
+                self.x, self.y = int(pos.x), int(pos.y)
+
+        else:
+            self.player_hit_count += 1
+            print('gotcha - %d' % self.player_hit_count)
+            player.colour = (255,0,0) # player is hit
+
+        self.update_screen_pos(player)
+
+    def hit(self):
+        self.hp -= 1
+        if self.hp <= 0:
+            self.killed = True
 
 
 class Button:
@@ -56,7 +108,7 @@ class Button:
 	def message(self, msg):
 			message_to_screen(msg, [0, 0, 0], [255, 255])
 
-			
+
 
 
 
@@ -71,6 +123,8 @@ class Player:
         self.r = radius
         self.v = velocity
         self.screen_size = screen_size # (x,y) tuple
+
+        self.colour = ( 236, 188, 180)
 
     def coord(self):
         return (self.x, self.y)
@@ -103,7 +157,7 @@ class Player:
     def draw(self, win):
         """player is always drawn in centre of screen"""
         centre_of_screen = (self.screen_size[0]//2, self.screen_size[1]//2)
-        pygame.draw.circle(win, ( 236, 188, 180), centre_of_screen, self.r)
+        pygame.draw.circle(win, self.colour, centre_of_screen, self.r)
 
     def new_pos(self, dir):
         """update position - dir is 'left', 'right', 'up' or 'down'"""
@@ -248,6 +302,12 @@ for i in range(1000):
     if not new_rock.is_colliding(player.coord(), radius):
         rocks.append(new_rock)
 
+
+zombies = pygame.sprite.Group()
+z = Zombie((200, 200))
+zombies.add(z)
+
+
 inventory_display = False
 
 
@@ -263,9 +323,9 @@ print('show startup button')
 startup = True
 
 button = Button()
+clock = pygame.time.Clock()
 
 while startup:
-	pygame.time.delay(100)
 	button.click()
 	if button.clicked:
 		startup= False
@@ -287,7 +347,7 @@ print('starting')
 
 
 run = True
-	
+
 
 while run:
     pygame.time.delay(50)
@@ -321,6 +381,12 @@ while run:
                             else:
                                 print("TIMBER! That's %d trees." % fallen_trees)
 
+                for zombie in zombies:
+                    if zombie.rect.collidepoint(pygame.mouse.get_pos()):
+                        zombie.hit()
+                        if zombie.killed:
+                            print("Killed a zombie!")
+
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_i]:
@@ -346,18 +412,24 @@ while run:
             if not any_collisions:
                 player.move_to(new_pos)
 
+    for zombie in zombies:
+        zombie.update(player)
+
     win.fill((green))
-    player.draw(win)
     for tree in trees:
         tree.draw(win, player)
     for rock in rocks:
         rock.draw(win, player)
 
+    zombies.draw(win)
+
+    player.draw(win)
+
     pygame.display.update()
 
-
+    clock.tick(30) # frames per second
 
 message_to_screen('Why are you leaving?', [255, 0, 0], [250, 250])
 pygame.display.update()
-pygame.time.delay(3000)
+pygame.time.delay(1000)
 pygame.quit()
