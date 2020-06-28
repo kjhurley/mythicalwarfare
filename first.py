@@ -62,17 +62,19 @@ class Zombie(pygame.sprite.Sprite):
 
     def update(self, player):
         """move toward the player"""
-        pos = pygame.math.Vector2(self.x, self.y)
         player_pos = pygame.math.Vector2((player.x, player.y))
+
+        # collision calculation uses screen co-ordinates
         player_screen_pos = pygame.math.Vector2(player.player_screen_coord())
-
         if not self.rect.collidepoint((player_screen_pos.x, player_screen_pos.y)):
+            pos = pygame.math.Vector2(self.x, self.y)
             if pos.distance_to(player_pos) < self.visible_range:
-                angle = pos.angle_to(player_pos)
+                angle = pos.angle_to(pos - player_pos)
+                print('zombie angle = ', angle)
                 move = self.velocity.rotate(angle)
-                pos += move
-                self.x, self.y = int(pos.x), int(pos.y)
-
+                print('zombie move = ', move)
+                pos -= move
+                self.x, self.y = pos.x, pos.y
         else:
             self.player_hit_count += 1
             print('gotcha - %d' % self.player_hit_count)
