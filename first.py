@@ -159,17 +159,18 @@ class Player:
         centre_of_screen = (self.screen_size[0]//2, self.screen_size[1]//2)
         pygame.draw.circle(win, self.colour, centre_of_screen, self.r)
 
-    def new_pos(self, dir):
-        """update position - dir is 'left', 'right', 'up' or 'down'"""
+    def new_pos(self, dirs):
+        """update position - dir is comma seperated string - 'left', 'right', 'up' or 'down'"""
         x, y = (self.x, self.y)
-        if dir == 'left':
-            x -= self.v
-        if dir == 'right':
-            x += self.v
-        if dir == 'down':
-            y -= self.v
-        if dir == 'up':
-            y += self.v
+        for d in dirs.split(','):
+            if d == 'left':
+                x -= self.v
+            if d == 'right':
+                x += self.v
+            if d == 'down':
+                y -= self.v
+            if d == 'up':
+                y += self.v
         return (x, y)
 
     def move_to(self, new_pos):
@@ -395,22 +396,23 @@ while run:
 
     # moving down is positive y change!
     # allow multiple keys down at same time - use if not elif
-    key_to_dir = {
-        keys[right_key]: 'right',
-        keys[left_key]: 'left',
-        keys[down_key]: 'up',
-        keys[up_key]: 'down'
-    }
-    for k, dir in key_to_dir.items():
-        if k:
-            new_pos = player.new_pos(dir)
-            any_collisions = False
-            for tree in trees:
-                if tree.is_colliding(new_pos, player.r):
-                    any_collisions = True
-                    break
-            if not any_collisions:
-                player.move_to(new_pos)
+    movement = ''
+    if keys[right_key]:
+        movement = ','.join(['right'])
+    if keys[left_key]:
+        movement = ','.join(['left'])
+    if keys[down_key]:
+        movement = ','.join([movement, 'up'])
+    if keys[up_key]:
+        movement = ','.join([movement, 'down'])
+    new_pos = player.new_pos(movement)
+    any_collisions = False
+    for tree in trees:
+        if tree.is_colliding(new_pos, player.r):
+            any_collisions = True
+            break
+    if not any_collisions:
+        player.move_to(new_pos)
 
     for zombie in zombies:
         zombie.update(player)
