@@ -1,5 +1,5 @@
 #buggs:
-#cannot move diagonaly
+#when zombie dead he stays on screen
 # i thought we fixed this
 #fix:
 #use both keys to move at once
@@ -36,7 +36,7 @@ class Zombie(pygame.sprite.Sprite):
     def __init__(self, coord):
         super().__init__()
         #self.colour = (0x98, 0xfb, 0x98)  # pale green
-        self.colour = (0xff, 0xff, 0xff) # white
+        self.colour = (0, 50, 0) # green
         self.width = 10
         self.height = 10
         self.x, self.y = coord
@@ -48,7 +48,7 @@ class Zombie(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # max speed of zombie
-        self.velocity = pygame.math.Vector2(0.2, 0)
+        self.velocity = pygame.math.Vector2(3, 0)
 
         self.hp = 3
         self.killed = False
@@ -70,9 +70,7 @@ class Zombie(pygame.sprite.Sprite):
             pos = pygame.math.Vector2(self.x, self.y)
             if pos.distance_to(player_pos) < self.visible_range:
                 angle = pos.angle_to(pos - player_pos)
-                print('zombie angle = ', angle)
                 move = self.velocity.rotate(angle)
-                print('zombie move = ', move)
                 pos -= move
                 self.x, self.y = pos.x, pos.y
         else:
@@ -307,7 +305,7 @@ for i in range(1000):
 
 
 zombies = pygame.sprite.Group()
-z = Zombie((200, 200))
+z = Zombie((random.randint(1, 200), random.randint(1, 200)))
 zombies.add(z)
 
 
@@ -354,6 +352,7 @@ run = True
 
 while run:
     pygame.time.delay(50)
+    player.colour = ( 236, 188, 180)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
