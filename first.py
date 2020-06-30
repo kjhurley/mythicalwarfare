@@ -18,7 +18,7 @@ import random
 
 pygame.init()
 pygame.font.init()
-
+zombie_kill= 0
 
 
 font= pygame.font.SysFont(None, 25)
@@ -37,8 +37,8 @@ class Zombie(pygame.sprite.Sprite):
         super().__init__()
         #self.colour = (0x98, 0xfb, 0x98)  # pale green
         self.colour = (0, 50, 0) # green
-        self.width = 10
-        self.height = 10
+        self.width = 30
+        self.height = 30
         self.x, self.y = coord
 
         self.screen_pos = pygame.math.Vector2(0, 0)
@@ -84,6 +84,7 @@ class Zombie(pygame.sprite.Sprite):
         self.hp -= 1
         if self.hp <= 0:
             self.killed = True
+            zombie_kill= 0
 
 
 class Button:
@@ -278,7 +279,7 @@ max_x = 500
 max_y = 500
 win = pygame.display.set_mode((max_x, max_y))
 green = (0,122,0)
-pygame.display.set_caption('my game')
+pygame.display.set_caption('mithical warfair')
 win.fill((green))
 
 radius = 20
@@ -423,8 +424,8 @@ while run:
         tree.draw(win, player)
     for rock in rocks:
         rock.draw(win, player)
-
-    zombies.draw(win)
+    if zombie_kill== 0:
+    	zombies.draw(win)
 
     player.draw(win)
 
