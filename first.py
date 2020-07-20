@@ -1,8 +1,8 @@
 #buggs:
 #when zombie dead he stays on screen
-# i thought we fixed this
+
 #fix:
-#use both keys to move at once
+#idk
 
 
 
@@ -118,10 +118,30 @@ class biome:
 		self.vegitation= (True)
 	def conditions(self):
 		if self.terrain== ('rock'):
-			vegitation= (False)
+			self.vegitation= (False)
 		if self.terrain== ('grass'):
-			vegitation= (True)	
-		
+			self.vegitation= (True)
+	def generate(self):
+		if self.vegitation== True:
+			biome_type= random.choice('plains', 'forest', 'lake')
+		if self.vegitation== False:
+			biome_type= random.choice('mountins', 'desert')
+		if biome_type== ('forest'):
+			trees = []
+			for i in range(50):
+					tree1_pos = (random.randint(-400, 400), random.randint(-self.size, self.size))
+					new_tree = Tree(tree1_pos, self.size)
+					if not new_tree.is_colliding(player.coord(), radius):
+							trees.append(new_tree)
+			for tree in trees:
+				tree.draw(win, player)
+		if biome_type== ('plains'):
+			rocks = []
+			for i in range(1000):
+					rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
+					new_rock = Rock(rock1_pos, 5)
+					if not new_rock.is_colliding(player.coord(), radius):
+							rocks.append(new_rock)
 
 
 
@@ -302,19 +322,8 @@ right_key = pygame.K_d
 up_key = pygame.K_w
 down_key = pygame.K_s
 
-trees = []
-for i in range(50):
-    tree1_pos = (random.randint(-400, 400), random.randint(-400, 400))
-    new_tree = Tree(tree1_pos, radius)
-    if not new_tree.is_colliding(player.coord(), radius):
-        trees.append(new_tree)
         
-rocks = []
-for i in range(1000):
-    rock1_pos = (random.randint(-2000, 2000), random.randint(-2000, 2000))
-    new_rock = Rock(rock1_pos, 5)
-    if not new_rock.is_colliding(player.coord(), radius):
-        rocks.append(new_rock)
+
 
 
 zombies = pygame.sprite.Group()
@@ -432,8 +441,7 @@ while run:
         zombie.update(player)
 
     win.fill((green))
-    for tree in trees:
-        tree.draw(win, player)
+
     for rock in rocks:
         rock.draw(win, player)
     
