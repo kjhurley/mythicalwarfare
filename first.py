@@ -18,7 +18,7 @@ import random
 
 pygame.init()
 pygame.font.init()
-zombie_kill= 0
+
 
 
 font= pygame.font.SysFont(None, 25)
@@ -53,7 +53,7 @@ class Zombie(pygame.sprite.Sprite):
         self.hp = 3
         self.killed = False
         self.player_hit_count = 0
-        self.visible_range = 100 # zombies can't see very well
+        self.visible_range = 1000 # zombies can't see very well
 
     def update_screen_pos(self, player):
         """given player, update zombie screen coordinates"""
@@ -110,6 +110,18 @@ class Button:
 			message_to_screen(msg, [0, 0, 0], [255, 255])
 
 
+
+class biome:
+	def __init__(self, size, terrain, player_pos):
+		self.size= random.randint(1000, 10000)
+		self.terrain= random.choice('rock', 'grass')
+		self.vegitation= (True)
+	def conditions(self):
+		if self.terrain== ('rock'):
+			vegitation= (False)
+		if self.terrain== ('grass'):
+			vegitation= (True)	
+		
 
 
 
@@ -424,8 +436,8 @@ while run:
         tree.draw(win, player)
     for rock in rocks:
         rock.draw(win, player)
-    if zombie_kill== 0:
-    	zombies.draw(win)
+    
+    zombies.draw(win)
 
     player.draw(win)
 
@@ -435,5 +447,4 @@ while run:
 
 message_to_screen('Why are you leaving?', [255, 0, 0], [250, 250])
 pygame.display.update()
-pygame.time.delay(1000)
 pygame.quit()
