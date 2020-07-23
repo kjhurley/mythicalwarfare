@@ -18,7 +18,12 @@ import random
 
 pygame.init()
 pygame.font.init()
-
+pygame.mixer.init
+chop_sound = pygame.mixer.Sound("chop.wav")
+def chop():
+    ####################################
+    pygame.mixer.Sound.play(chop_sound)
+    pygame.mixer.music.stop()
 
 
 font= pygame.font.SysFont(None, 25)
@@ -423,6 +428,7 @@ while run:
                 for tree in trees:
                     if tree.is_chopped(map_pos):
                         print('chop')
+                        chop()
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
