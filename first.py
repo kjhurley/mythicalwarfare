@@ -111,8 +111,8 @@ class Button:
 
 
 
-class biome:
-	def __init__(self, size, terrain, player_pos):
+class Biome:
+	def __init__(self, biome_pos):
 		self.size= random.randint(1000, 10000)
 		self.terrain= random.choice('rock', 'grass')
 		self.vegitation= (True)
@@ -128,13 +128,21 @@ class biome:
 			biome_type= random.choice('mountins', 'desert')
 		if biome_type== ('forest'):
 			trees = []
-			for i in range(50):
-					tree1_pos = (random.randint(-400, 400), random.randint(-self.size, self.size))
+			for i in range(self.size):
+					tree1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
 					new_tree = Tree(tree1_pos, self.size)
 					if not new_tree.is_colliding(player.coord(), radius):
 							trees.append(new_tree)
+			rocks = []
+			for i in range(1000):
+					rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
+					new_rock = Rock(rock1_pos, 5)
+					if not new_rock.is_colliding(player.coord(), radius):
+							rocks.append(new_rock)
 			for tree in trees:
 				tree.draw(win, player)
+			for rock in rocks:
+				rock.draw(win, player)
 		if biome_type== ('plains'):
 			rocks = []
 			for i in range(1000):
@@ -142,6 +150,9 @@ class biome:
 					new_rock = Rock(rock1_pos, 5)
 					if not new_rock.is_colliding(player.coord(), radius):
 							rocks.append(new_rock)
+			for rock in rocks:
+				rock.draw(win, player)
+
 
 
 
@@ -323,6 +334,13 @@ up_key = pygame.K_w
 down_key = pygame.K_s
 
         
+trees = []
+
+for i in range(50):
+					tree1_pos = (random.randint(-400, 400), random.randint(-500, 500))
+					new_tree = Tree(tree1_pos, 500)
+					if not new_tree.is_colliding(player.coord(), radius):
+							trees.append(new_tree)
 
 
 
@@ -370,21 +388,28 @@ print('starting')
 
 
 run = True
+biomes = [Biome()]
+
+
+
 
 
 while run:
-    pygame.time.delay(50)
+
     player.colour = ( 236, 188, 180)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.K_ESCAPE:
-            	button.click()
-            	if button.clicked:
-            		startup= False
-            	button.draw()
-            	button.message('quit')
-            	pygame.time.delay(1000000)
+            	pause= True
+            	while pause:
+                    button.click()
+                    if button.clicked:
+                    	run= False
+                    	pause= False
+                    button.draw()
+                    button.message('quit')
+                    pygame.time.delay(10)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
                 if player.v < max_x/2:
@@ -442,8 +467,7 @@ while run:
 
     win.fill((green))
 
-    for rock in rocks:
-        rock.draw(win, player)
+
     
     zombies.draw(win)
 
