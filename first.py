@@ -13,17 +13,16 @@ from pygame import rect
 import pygame.math
 import math
 import random
-
+import time
 
 
 pygame.init()
 pygame.font.init()
-pygame.mixer.init
-chop_sound = pygame.mixer.Sound("chop.wav")
-def chop():
-    ####################################
-    pygame.mixer.Sound.play(chop_sound)
-    pygame.mixer.music.stop()
+
+
+
+
+
 
 
 font= pygame.font.SysFont(None, 25)
@@ -92,10 +91,18 @@ class Zombie(pygame.sprite.Sprite):
             zombie_kill= 0
 
 
+
+
+
+
+
+
+
+
 class Button:
 	def __init__(self):
 		self.colour = (255, 0, 0)
-		self.position = 250
+		self.position= 250
 		self.rect_coords = (self.position, self.position, 50, 30)
 		self.rect = None
 		self.clicked = False
@@ -367,19 +374,34 @@ game_start= 0
 print('show startup button')
 
 startup = True
-
 button = Button()
 clock = pygame.time.Clock()
+pos_topleft_y= ((max_y/2)-25)
+pos_topleft_x= ((max_x)/4)
+full_load=	(max_x/2)
+win.fill((0, 0, 0))
+load= 0
+while load<101:
+	pygame.display.update
+	percentage_load= load * full_load/100
+	pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
+	pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+	pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
+	pygame.display.update()
+	load+= 5
+	time.sleep(0.1)
+win.fill((green))
+pygame.display.update
 
 while startup:
+	button.draw()
 	button.click()
 	if button.clicked:
 		startup= False
 	message_to_screen('MYTHICAL WARFARE', (250, 0, 0), (159, 120))
-	button.draw()
 	button.message('start')
 	pygame.display.update()
-
+	win.fill((green))
 
 def draw_crafting_grid():
 	pygame.draw.rect(win, (128,128,128), (250, 0), (50, 50))
@@ -393,7 +415,24 @@ print('starting')
 
 
 run = True
-biomes = [Biome()]
+pos_topleft_y= ((max_y/2)-25)
+pos_topleft_x= ((max_x)/4)
+full_load=	(max_x/2)
+
+load= 0
+while load<100:
+	pygame.display.update
+	percentage_load= load * full_load/100
+	pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
+	pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+	pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
+	pygame.display.update()
+	
+
+	load+= 1
+
+
+
 
 
 
@@ -428,7 +467,6 @@ while run:
                 for tree in trees:
                     if tree.is_chopped(map_pos):
                         print('chop')
-                        chop()
                         if tree.fallen:
                             fallen_trees += 1
                             if fallen_trees == 1:
@@ -476,7 +514,7 @@ while run:
 
     
     zombies.draw(win)
-
+    zombie.hit()
     player.draw(win)
 
     pygame.display.update()
