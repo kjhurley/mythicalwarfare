@@ -74,7 +74,7 @@ class Zombie(pygame.sprite.Sprite):
         # collision calculation uses screen co-ordinates
         player_screen_pos = pygame.math.Vector2(player.player_screen_coord())
         if not self.rect.collidepoint((player_screen_pos.x, player_screen_pos.y)):
-            to_player = pygame.math.Vector2(player.x - self.x, player.y - self.y)
+            to_player = player_pos - pos
             if to_player.length() < self.visible_range:
                 _, angle_to_player = to_player.as_polar()
                 move = self.velocity.rotate(angle_to_player)
