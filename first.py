@@ -189,13 +189,15 @@ class Player:
     def coord(self):
         return (self.x, self.y)
 
-		def health(full_size, pos_x, pos_y):
-						player_hp= full_size/100
-						health= (player_hp - player.hit_count)
-						hp_bar= full_size -health
-						pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
-						pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
-						pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
+    def health(full_size, pos_x, pos_y):
+        player_hp= full_size/100
+        health= (player_hp - player.hit_count)
+        hp_bar= full_size -health
+        pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
+        pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+        pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
+
+
     def map_coord(self, screen_coord):
         """convert a screen coordinate to a map coordinate"""
         x, y = screen_coord
@@ -393,7 +395,7 @@ win.fill((0, 0, 0))
 load= 0
 while load<101:
 	pygame.display.update
-	percentage_load= load * full_load/100
+	percentage_load= int(load * full_load/100)
 	pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
 	pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
 	pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
@@ -443,7 +445,7 @@ while load<100:
 
 
 
-
+max_speed= max_x/2
 
 
 
@@ -466,7 +468,7 @@ while run:
                     pygame.time.delay(10)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
-                if player.v < max_x/2:
+                if player.v < max_speed:
                     player.v += 1
             if event.button == 5: # mouse wheel down
                 if player.v > 0: # can't go slower than full stop!
@@ -479,6 +481,7 @@ while run:
                         print('chop')
                         if tree.fallen:
                             fallen_trees += 1
+                            max_speed -= 5
                             if fallen_trees == 1:
                                 print("TIMBER! That's %d tree." % fallen_trees)
                             else:
@@ -532,7 +535,7 @@ while run:
     print(player.health)
     if player.health > 0:
     	player.draw(win)
-    health(100, 400, 0)
+    player.health(100, 400, 0)
     pygame.display.update()
 
     clock.tick(30) # frames per second
