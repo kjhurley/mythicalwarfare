@@ -94,13 +94,7 @@ class Zombie(pygame.sprite.Sprite):
             zombie_kill= 0
 
 
-def health(full_size, pos_x, pos_y):
-        player_hp= full_size/100
-        health= (player_hp - player.hit_count)
-        hp_bar= full_size -health
-        pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
-        pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
-        pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
+
 
 
 
@@ -195,7 +189,13 @@ class Player:
     def coord(self):
         return (self.x, self.y)
 
-
+		def health(full_size, pos_x, pos_y):
+						player_hp= full_size/100
+						health= (player_hp - player.hit_count)
+						hp_bar= full_size -health
+						pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
+						pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+						pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
     def map_coord(self, screen_coord):
         """convert a screen coordinate to a map coordinate"""
         x, y = screen_coord
