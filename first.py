@@ -81,8 +81,8 @@ class Zombie(pygame.sprite.Sprite):
                 pos += move
                 self.x, self.y = pos.x, pos.y
         else:
-            self.player_hit_count += 1
-            print('gotcha - %d' % self.player_hit_count)
+            player.hit_count += 1
+            print('gotcha - %d' % player.hit_count)
             player.colour = (255,0,0) # player is hit
 
         self.update_screen_pos(player)
@@ -95,14 +95,12 @@ class Zombie(pygame.sprite.Sprite):
 
 
 def health(full_size, pos_x, pos_y):
-        player_hp= full_size/600
-        health= (player_hp - player_hit_count)
-        pygame.display.update
-        hp_bar= health
+        player_hp= full_size/100
+        health= (player_hp - player.hit_count)
+        hp_bar= full_size -health
         pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
         pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
-        pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, health, 25))
-        pygame.display.update()
+        pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
 
 
 
@@ -192,7 +190,8 @@ class Player:
         self.screen_size = screen_size # (x,y) tuple
 
         self.colour = ( 236, 188, 180)
-
+        self.hit_count = 0
+        self.health= (100- self.hit_count)
     def coord(self):
         return (self.x, self.y)
 
@@ -261,7 +260,6 @@ class Player:
             return True
         else:
             return False
-
 
 
 
@@ -521,14 +519,20 @@ while run:
     for zombie in zombies:
         zombie.update(player)
 
+
+
+
+
     win.fill((green))
 
 
   
     zombies.draw(win)
     zombie.hit()
-    player.draw(win)
-
+    print(player.health)
+    if player.health > 0:
+    	player.draw(win)
+    health(100, 400, 0)
     pygame.display.update()
 
     clock.tick(30) # frames per second
