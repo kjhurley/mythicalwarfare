@@ -1,10 +1,13 @@
-#buggs:
-#when zombie dead he stays on screen
-
-#fix:
-#idk
-
-
+#bugs:
+# (1) when zombie dead he stays on screen
+#
+#   fix:
+#      idk
+#
+# (2) zombie moves left only
+#    fix: redo the Zombie.update method to calculate distance between
+#    zombie and player as vector. Use angle of that vector to rotate the
+#    zombie velocity vector. Then add velocity vector to zombie position
 
 
 import pygame
@@ -67,15 +70,15 @@ class Zombie(pygame.sprite.Sprite):
     def update(self, player):
         """move toward the player"""
         player_pos = pygame.math.Vector2((player.x, player.y))
-
+        pos = pygame.math.Vector2(self.x, self.y)
         # collision calculation uses screen co-ordinates
         player_screen_pos = pygame.math.Vector2(player.player_screen_coord())
         if not self.rect.collidepoint((player_screen_pos.x, player_screen_pos.y)):
-            pos = pygame.math.Vector2(self.x, self.y)
-            if pos.distance_to(player_pos) < self.visible_range:
-                angle = pos.angle_to(pos - player_pos)
-                move = self.velocity.rotate(angle)
-                pos -= move
+            to_player = pygame.math.Vector2(player.x - self.x, player.y - self.y)
+            if to_player.length() < self.visible_range:
+                _, angle_to_player = to_player.as_polar()
+                move = self.velocity.rotate(angle_to_player)
+                pos += move
                 self.x, self.y = pos.x, pos.y
         else:
             self.player_hit_count += 1
