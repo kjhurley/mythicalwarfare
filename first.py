@@ -30,8 +30,8 @@ player_hit_count= 0
 
 font= pygame.font.SysFont(None, 25)
 def message_to_screen(msg,color,pos):
-	screen_text= font.render(msg, True, color)
-	win.blit(screen_text, (pos))
+    screen_text= font.render(msg, True, color)
+    win.blit(screen_text, (pos))
 
 
 
@@ -59,7 +59,6 @@ class Zombie(pygame.sprite.Sprite):
 
         self.hp = 3
         self.killed = False
-        self.player_hit_count = 0
         self.visible_range = 1000 # zombies can't see very well
 
     def update_screen_pos(self, player):
@@ -81,9 +80,7 @@ class Zombie(pygame.sprite.Sprite):
                 pos += move
                 self.x, self.y = pos.x, pos.y
         else:
-            player.hit_count += 1
-            print('gotcha - %d' % player.hit_count)
-            player.colour = (255,0,0) # player is hit
+            player.hit(1)
 
         self.update_screen_pos(player)
 
@@ -103,70 +100,70 @@ class Zombie(pygame.sprite.Sprite):
 
 
 class Button:
-	def __init__(self):
-		self.colour = (255, 0, 0)
-		self.position= 250
-		self.rect_coords = (self.position, self.position, 50, 30)
-		self.rect = None
-		self.clicked = False
+    def __init__(self):
+        self.colour = (255, 0, 0)
+        self.position= 250
+        self.rect_coords = (self.position, self.position, 50, 30)
+        self.rect = None
+        self.clicked = False
 
-	def draw(self):
-		 self.rect = pygame.draw.rect(win, self.colour, self.rect_coords)
+    def draw(self):
+         self.rect = pygame.draw.rect(win, self.colour, self.rect_coords)
 
-	def click(self):
-		 for event in pygame.event.get():
-				if event.type == pygame.MOUSEBUTTONDOWN:
-					click = self.rect.collidepoint(pygame.mouse.get_pos())
-					if click == 1:
-						self.colour = (0, 0, 255)
-						self.clicked = True
+    def click(self):
+         for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    click = self.rect.collidepoint(pygame.mouse.get_pos())
+                    if click == 1:
+                        self.colour = (0, 0, 255)
+                        self.clicked = True
 
-	def message(self, msg):
-			message_to_screen(msg, [0, 0, 0], [255, 255])
+    def message(self, msg):
+            message_to_screen(msg, [0, 0, 0], [255, 255])
 
 
 
 class Biome:
-	def __init__(self, biome_pos):
-		self.size= random.randint(1000, 10000)
-		self.terrain= random.choice('rock', 'grass')
-		self.vegitation= (True)
-	def conditions(self):
-		if self.terrain== ('rock'):
-			self.vegitation= (False)
-		if self.terrain== ('grass'):
-			self.vegitation= (True)
-	def generate(self):
-		if self.vegitation== True:
-			biome_type= random.choice('plains', 'forest', 'lake')
-		if self.vegitation== False:
-			biome_type= random.choice('mountins', 'desert')
-		if biome_type== ('forest'):
-			trees = []
-			for i in range(self.size):
-					tree1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-					new_tree = Tree(tree1_pos, self.size)
-					if not new_tree.is_colliding(player.coord(), radius):
-							trees.append(new_tree)
-			rocks = []
-			for i in range(1000):
-					rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-					new_rock = Rock(rock1_pos, 5)
-					if not new_rock.is_colliding(player.coord(), radius):
-							rocks.append(new_rock)
-			for tree in trees:
-				tree.draw(win, player)
-			for rock in rocks:
-				rock.draw(win, player)
-		if biome_type== ('plains'):
-			rocks = []
-			for i in range(1000):
-					rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-					new_rock = Rock(rock1_pos, 5)
-					if not new_rock.is_colliding(player.coord(), radius):
-							rocks.append(new_rock)
-			for rock in rocks:
-				rock.draw(win, player)
+    def __init__(self, biome_pos):
+        self.size= random.randint(1000, 10000)
+        self.terrain= random.choice('rock', 'grass')
+        self.vegitation= (True)
+    def conditions(self):
+        if self.terrain== ('rock'):
+            self.vegitation= (False)
+        if self.terrain== ('grass'):
+            self.vegitation= (True)
+    def generate(self):
+        if self.vegitation== True:
+            biome_type= random.choice('plains', 'forest', 'lake')
+        if self.vegitation== False:
+            biome_type= random.choice('mountins', 'desert')
+        if biome_type== ('forest'):
+            trees = []
+            for i in range(self.size):
+                    tree1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
+                    new_tree = Tree(tree1_pos, self.size)
+                    if not new_tree.is_colliding(player.coord(), radius):
+                            trees.append(new_tree)
+            rocks = []
+            for i in range(1000):
+                    rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
+                    new_rock = Rock(rock1_pos, 5)
+                    if not new_rock.is_colliding(player.coord(), radius):
+                            rocks.append(new_rock)
+            for tree in trees:
+                tree.draw(win, player)
+            for rock in rocks:
+                rock.draw(win, player)
+        if biome_type== ('plains'):
+            rocks = []
+            for i in range(1000):
+                    rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
+                    new_rock = Rock(rock1_pos, 5)
+                    if not new_rock.is_colliding(player.coord(), radius):
+                            rocks.append(new_rock)
+            for rock in rocks:
+                rock.draw(win, player)
 
 
 
@@ -185,18 +182,18 @@ class Player:
 
         self.colour = ( 236, 188, 180)
         self.hit_count = 0
-        self.health= (100- self.hit_count)
+        self.health = (100 - self.hit_count)
+
     def coord(self):
         return (self.x, self.y)
 
-    def health(full_size, pos_x, pos_y):
-        player_hp= full_size/100
-        health= (player_hp - player.hit_count)
-        hp_bar= full_size -health
+    def draw_health_bar(self, win, full_size, pos_x, pos_y):
+        player_hp = full_size/100
+        health = (player_hp - self.hit_count)
+        hp_bar = full_size - health
         pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
         pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
         pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
-
 
     def map_coord(self, screen_coord):
         """convert a screen coordinate to a map coordinate"""
@@ -225,8 +222,14 @@ class Player:
 
     def draw(self, win):
         """player is always drawn in centre of screen"""
-        centre_of_screen = (self.screen_size[0]//2, self.screen_size[1]//2)
-        pygame.draw.circle(win, self.colour, centre_of_screen, self.r)
+
+        # only draw if not dead
+        if self.health > 0:
+            centre_of_screen = (self.screen_size[0]//2, self.screen_size[1]//2)
+            pygame.draw.circle(win, self.colour, centre_of_screen, self.r)
+
+        # always draw health bar
+        self.draw_health_bar(win, 100, 400, 0)
 
     def new_pos(self, dirs):
         """update position - dir is comma seperated string - 'left', 'right', 'up' or 'down'"""
@@ -263,12 +266,9 @@ class Player:
         else:
             return False
 
-
-
-
-
-
-
+    def hit(self, hit_points):
+        self.hit_count -= hit_points
+        self.colour = (255, 0, 0)  # player is hit
 
 
 class Tree:
@@ -361,10 +361,10 @@ down_key = pygame.K_s
 trees = []
 
 for i in range(50):
-					tree1_pos = (random.randint(-400, 400), random.randint(-500, 500))
-					new_tree = Tree(tree1_pos, 500)
-					if not new_tree.is_colliding(player.coord(), radius):
-							trees.append(new_tree)
+                    tree1_pos = (random.randint(-400, 400), random.randint(-500, 500))
+                    new_tree = Tree(tree1_pos, 500)
+                    if not new_tree.is_colliding(player.coord(), radius):
+                            trees.append(new_tree)
 
 
 
@@ -394,32 +394,32 @@ full_load=	(max_x/2)
 win.fill((0, 0, 0))
 load= 0
 while load<101:
-	pygame.display.update
-	percentage_load= int(load * full_load/100)
-	pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
-	pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
-	pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
-	pygame.display.update()
-	load+= 5
-	time.sleep(0.1)
+    pygame.display.update
+    percentage_load= int(load * full_load/100)
+    pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
+    pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+    pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
+    pygame.display.update()
+    load+= 5
+    time.sleep(0.1)
 win.fill((green))
 pygame.display.update
 
 while startup:
-	button.draw()
-	button.click()
-	if button.clicked:
-		startup= False
-	message_to_screen('MYTHICAL WARFARE', (250, 0, 0), (159, 120))
-	button.message('start')
-	pygame.display.update()
-	win.fill((green))
+    button.draw()
+    button.click()
+    if button.clicked:
+        startup= False
+    message_to_screen('MYTHICAL WARFARE', (250, 0, 0), (159, 120))
+    button.message('start')
+    pygame.display.update()
+    win.fill((green))
 
 def draw_crafting_grid():
-	pygame.draw.rect(win, (128,128,128), (250, 0), (50, 50))
-	pygame.draw.rect(win, (128,128,128), (200, 0), (50, 50))
-	pygame.draw.rect(win, (128,128,128), (250, 50), (50, 50))
-	pygame.draw.rect(win, (128,128,128), (200, 50), (50, 50))
+    pygame.draw.rect(win, (128,128,128), (250, 0), (50, 50))
+    pygame.draw.rect(win, (128,128,128), (200, 0), (50, 50))
+    pygame.draw.rect(win, (128,128,128), (250, 50), (50, 50))
+    pygame.draw.rect(win, (128,128,128), (200, 50), (50, 50))
 
 
 
@@ -433,15 +433,15 @@ full_load=	(max_x/2)
 
 load= 0
 while load<100:
-	pygame.display.update
-	percentage_load= load * full_load/100
-	pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
-	pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
-	pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
-	pygame.display.update()
-	
+    pygame.display.update
+    percentage_load= load * full_load/100
+    pygame.draw.rect(win, (255, 0, 0), (pos_topleft_x, pos_topleft_y, full_load, 25))
+    pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+    pygame.draw.rect(win, (0, 255, 0), (pos_topleft_x, pos_topleft_y, percentage_load, 25))
+    pygame.display.update()
 
-	load+= 1
+
+    load+= 1
 
 
 
@@ -457,12 +457,12 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.K_ESCAPE:
-            	pause= True
-            	while pause:
+                pause= True
+                while pause:
                     button.click()
                     if button.clicked:
-                    	run= False
-                    	pause= False
+                        run= False
+                        pause= False
                     button.draw()
                     button.message('quit')
                     pygame.time.delay(10)
@@ -531,11 +531,8 @@ while run:
 
   
     zombies.draw(win)
-    zombie.hit()
     print(player.health)
-    if player.health > 0:
-    	player.draw(win)
-    player.health(100, 400, 0)
+    player.draw(win)
     pygame.display.update()
 
     clock.tick(30) # frames per second
