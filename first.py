@@ -23,7 +23,7 @@ pygame.init()
 pygame.font.init()
 
 
-
+hit_chance= ['hit']
 player_hit_count= 0
 
 
@@ -183,6 +183,7 @@ class Player:
         self.colour = ( 236, 188, 180)
         self.hit_count = 0
         self.health = (100 - self.hit_count)
+        self.armour_durb= 100
 
     def coord(self):
         return (self.x, self.y)
@@ -267,8 +268,22 @@ class Player:
             return False
 
     def hit(self, hit_points):
-        self.hit_count -= hit_points
-        self.colour = (255, 0, 0)  # player is hit
+        hit= random.choice(hit_chance)
+        if hit== 'hit':
+            self.hit_count -= hit_points
+            self.colour = (255, 0, 0)  # player is hit
+        else:
+            self.armour_durb-=1
+    def armour(self, level):
+        size= radius+ 5+ level
+        hit= hit_chance
+        hit.clear
+        hit.append('hit')
+        for i in range(level):
+            hit.append('proctected')
+        pygame.draw.circle(win, (0, 0, 0), (0, 0), size)
+
+
 
 
 class Tree:
@@ -456,6 +471,8 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.K_t:
+            command= input('command:\n')
         if event.type == pygame.K_ESCAPE:
                 pause= True
                 while pause:
@@ -527,6 +544,10 @@ while run:
 
 
     win.fill((green))
+
+    if command== 'armor':
+        level= input('level:\n')
+        player.armour(level)
 
 
   
