@@ -183,11 +183,11 @@ class Player:
         self.r = radius
         self.v = velocity
         self.energy= None
+        self.hit_count = 0
         self.screen_size = screen_size # (x,y) tuple
         self.health = (100 - self.hit_count)
         self.armour_durb= 100
         self.colour = ( 236, 188, 180)
-        self.hit_count = 0
         self.hit_chance= ['hit']
 
     def coord(self):
