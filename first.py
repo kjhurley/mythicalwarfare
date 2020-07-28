@@ -23,7 +23,8 @@ pygame.init()
 pygame.font.init()
 
 
-hit_chance= ['hit']
+
+
 player_hit_count= 0
 
 
@@ -63,11 +64,14 @@ class Zombie(pygame.sprite.Sprite):
 
     def update_screen_pos(self, player):
         """given player, update zombie screen coordinates"""
-        self.screen_pos = pygame.math.Vector2(player.screen_coord((self.x, self.y)))
-        self.rect = self.image.get_rect(x=self.screen_pos.x, y=self.screen_pos.y)
+        if not self.killed:
+          self.screen_pos = pygame.math.Vector2(player.screen_coord((self.x, self.y)))
+          self.rect = self.image.get_rect(x=self.screen_pos.x, y=self.screen_pos.y)
 
     def update(self, player):
         """move toward the player"""
+        if self.killed:
+          return
         player_pos = pygame.math.Vector2((player.x, player.y))
         pos = pygame.math.Vector2(self.x, self.y)
         # collision calculation uses screen co-ordinates
@@ -88,7 +92,7 @@ class Zombie(pygame.sprite.Sprite):
         self.hp -= 1
         if self.hp <= 0:
             self.killed = True
-            zombie_kill= 0
+            self.kill()
 
 
 
@@ -184,6 +188,7 @@ class Player:
         self.hit_count = 0
         self.health = (100 - self.hit_count)
         self.armour_durb= 100
+        self.hit_chance= ['hit']
 
     def coord(self):
         return (self.x, self.y)
@@ -268,21 +273,22 @@ class Player:
             return False
 
     def hit(self, hit_points):
-        hit= random.choice(hit_chance)
+        hit= random.choice(self.hit_chance)
         if hit== 'hit':
             self.hit_count -= hit_points
             self.colour = (255, 0, 0)  # player is hit
         else:
             self.armour_durb-=1
+            print('protected')
     def armour(self, level):
-        size= radius+ 5+ level
-        hit= hit_chance
-        hit.clear
+        hit= self.hit_chance
+        hit.clear()
         hit.append('hit')
         for i in range(level):
             hit.append('proctected')
+    def draw_armour(self, level):
+        size= radius +5 +level
         pygame.draw.circle(win, (0, 0, 0), (0, 0), size)
-
 
 
 
@@ -466,7 +472,7 @@ max_speed= max_x/2
 
 
 while run:
-
+    command = None
     player.colour = ( 236, 188, 180)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -519,6 +525,7 @@ while run:
     # moving down is positive y change!
     # allow multiple keys down at same time - use if not elif
     movement = ''
+
     if keys[right_key]:
         movement = ','.join(['right'])
     if keys[left_key]:
@@ -536,12 +543,9 @@ while run:
     if not any_collisions:
         player.move_to(new_pos)
 
+    dead_zombies = []
     for zombie in zombies:
         zombie.update(player)
-
-
-
-
 
     win.fill((green))
 
