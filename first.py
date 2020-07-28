@@ -58,7 +58,7 @@ class Zombie(pygame.sprite.Sprite):
         # max speed of zombie
         self.velocity = pygame.math.Vector2(3, 0)
 
-        self.hp = 3
+        self.hp = 9
         self.killed = False
         self.visible_range = 1000 # zombies can't see very well
 
@@ -173,7 +173,7 @@ class Biome:
 
 
 
-
+armour_durb= 100
 
 
 class Player:
@@ -182,12 +182,12 @@ class Player:
         self.y = pos[1]
         self.r = radius
         self.v = velocity
+        self.energy= None
         self.screen_size = screen_size # (x,y) tuple
-
-        self.colour = ( 236, 188, 180)
-        self.hit_count = 0
         self.health = (100 - self.hit_count)
         self.armour_durb= 100
+        self.colour = ( 236, 188, 180)
+        self.hit_count = 0
         self.hit_chance= ['hit']
 
     def coord(self):
@@ -200,6 +200,18 @@ class Player:
         pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
         pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
         pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
+    def draw_hunger_bar(self, win, full_size, pos_x, pos_y):
+        player_h = full_size/100
+        
+        hunger = (player_h - self.energy)
+        hp_bar = full_size - hunger
+        pygame.draw.rect(win, (255, 0, 0), (pos_x, pos_y, full_size, 25))
+        pygame.draw.rect(win, (0,255,0), (40, 30, 20, 10))
+        pygame.draw.rect(win, (0, 255, 0), (pos_x, pos_y, hp_bar, 25))
+        heal=random.randint(1, 5)
+        if hunger== 100:
+          self.health+= heal
+
 
     def map_coord(self, screen_coord):
         """convert a screen coordinate to a map coordinate"""
@@ -253,6 +265,8 @@ class Player:
 
     def move_to(self, new_pos):
         self.x, self.y = new_pos
+        self.energy = random.randint(3, 5)
+
 
     def overlaps(self, pos, radius=None):
         if radius is None:
@@ -288,7 +302,8 @@ class Player:
             hit.append('proctected')
     def draw_armour(self, level):
         size= radius +5 +level
-        pygame.draw.circle(win, (0, 0, 0), (0, 0), size)
+        pygame.draw.circle(win, (0, 0, 0), (250, 250), size)
+    
 
 
 
@@ -553,12 +568,16 @@ while run:
         level= input('level:\n')
         player.armour(level)
 
-
-  
+    if player.armour_durb> 0:
+      player.armour(3)
+    player.draw_armour(3)
     zombies.draw(win)
     print(player.health)
     player.draw(win)
+    player.draw_hunger_bar(win, 100, 400, 28)
     pygame.display.update()
+    if player.health== 0:
+      pygame.quit()
 
     clock.tick(30) # frames per second
 
