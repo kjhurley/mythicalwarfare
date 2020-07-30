@@ -186,7 +186,7 @@ class Player:
         self.hit_count = 0
         self.screen_size = screen_size # (x,y) tuple
         self.health = (100 - self.hit_count)
-        self.armour_durb= 100
+        self.armour_durb= 50
         self.colour = ( 236, 188, 180)
         self.hit_chance= ['hit']
 
@@ -564,13 +564,20 @@ while run:
 
     win.fill((green))
 
+
+    player.hit_chance.clear()
+    player.hit_chance.clear()
     if command== 'armor':
         level= input('level:\n')
         player.armour(level)
 
+
+
+    player.hit_chance.clear()
+    player.hit_chance.append('hit')
     if player.armour_durb> 0:
       player.armour(3)
-    player.draw_armour(3)
+      player.draw_armour(3)
     zombies.draw(win)
     print(player.health)
     player.draw(win)
