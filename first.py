@@ -17,16 +17,12 @@ import pygame.math
 import math
 import random
 import time
+from math import sqrt
 
 
 pygame.init()
 pygame.font.init()
-
-
-
-
-player_hit_count= 0
-
+pygame.mixer.init()
 
 
 font= pygame.font.SysFont(None, 25)
@@ -308,7 +304,7 @@ class Player:
 
 
 class Tree:
-    def __init__(self, pos, radius):
+    def __init__(self, pos, radius=20):
         self.x = pos[0]
         self.y = pos[1]
         self.r = radius
@@ -355,7 +351,7 @@ class Tree:
 
 class Rock(Tree):
     COLOUR = 0xd3d3d3
-    def __init__(self, pos, radius):
+    def __init__(self, pos, radius=5):
         super().__init__(pos, radius)
         self.r = radius
 
@@ -377,12 +373,137 @@ class Rock(Tree):
         return False
 
 
+class Lake(Tree):
+    COLOUR = 0x00007f
+    def __init__(self, pos, radius=15):
+        super().__init__(pos, radius)
+        self.r = radius
+
+    def draw(self, win, player):
+        screen_x, screen_y = player.screen_coord((self.x, self.y))
+
+        if not self.fallen:
+            pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
+
+    def is_colliding(self, pos, radius):
+        """True if circle at pos of given radius is touching"""
+        if self.overlaps(pos, radius + self.r):
+            return True
+        else:
+            return False
+
+    def is_chopped(self, click_pos):
+        """lakes cant be chopped"""
+        return False
+
+vectors = [(-1.,0),(.5,sqrt(3.)/2.),(.5,-sqrt(3.)/2.)]
+
+def randinunithex():
+    x = random.randrange(3)
+    (v1,v2) = (vectors[x], vectors[(x+1)%3])
+    (x,y) = (random.random(), random.random())
+    return (x*v1[0]+y*v2[0],x*v1[1]+y*v2[1])
+
+
+class Biome:
+    SIZE = 1000
+    NUM_TERRAIN_THINGS = 500 # eg 500 things selected from trees, rocks, lakes
+    def __init__(self, centre):
+        self.centre = centre
+        self.terrain_choice = ['tree'] * 5 + ['rock'] * 15 + ['lake'] * 1
+        self.terrain_class = {
+            'tree': Tree,
+            'rock': Rock,
+            'lake': None
+        }
+
+    def random_in_hex(self):
+        """generate random x,y within the biome hexagon"""
+        pos = randinunithex()
+        pos = pos[0] * self.SIZE, pos[1] * self.SIZE
+        return (int(self.centre[0] + pos[0]), int(self.centre[1] + pos[1]))
+
+    def fill(self, map):
+        """biome fills map with stuff like trees, rocks, lakes"""
+
+
+        creation_order = []
+        # create a bunch of terrain features eg rocks, trees etc
+        for _ in range(self.NUM_TERRAIN_THINGS):
+            creation_order.append(random.choice(self.terrain_choice))
+
+        for t in creation_order:
+            if t == 'rock':
+                pos = self.random_in_hex()
+                new_rock = Rock(pos)
+                if not new_rock.is_colliding(player.coord(), player.r):
+                    map.rocks.append(new_rock)
+        for t in creation_order:
+            if t == 'tree':
+                pos = self.random_in_hex()
+                new_tree = Tree(pos)
+                if not new_tree.is_colliding(player.coord(), player.r):
+                    map.trees.append(new_tree)
+        for t in creation_order:
+            if t == 'lake':
+                pos = self.random_in_hex()
+                new_lake = Lake(pos)
+                if not new_lake.is_colliding(player.coord(), player.r):
+                    map.lakes.append(new_lake)
+
+
+def hexagon_tiler(start, hex_size, num_hexagons):
+    """fill a map space using hexagons"""
+    central_pos = start
+    neighbour_count = 0
+    diameter = hex_size
+
+    # offset
+    new_pos = start
+
+    while num_hexagons > 0:
+        yield new_pos
+        num_hexagons -= 1
+
+
+class Map:
+    """tracks all the biomes etc"""
+    NUM_BIOMES = 1
+    BIOME_SIZE = 500 # biomes are hexagons - this is the diameter of a hexagon
+
+    def __init__(self):
+        self.biomes = []
+        self.trees = []
+        self.rocks = []
+        self.lakes = []
+
+    def draw(self, win: pygame.Surface, player: Player):
+        """draw part of the map around the player onto the surface"""
+        for r in self.rocks:
+            r.draw(win, player)
+        for t in self.trees:
+            t.draw(win, player)
+        for l in self.lakes:
+            l.draw(win, player)
+
+    def generate(self):
+        """fill the map with biomes"""
+        biome_count = self.NUM_BIOMES
+        self.biomes.append(Biome((0,0)))
+        biome_count -= 1
+        for center in hexagon_tiler((0, 0), self.BIOME_SIZE, biome_count):
+            self.biomes.append(Biome(center))
+
+        for b in self.biomes:
+            b.fill(self)
+
+
 pygame.init()
 max_x = 500
 max_y = 500
 win = pygame.display.set_mode((max_x, max_y))
 green = (0,122,0)
-pygame.display.set_caption('mithical warfair')
+pygame.display.set_caption('mythical warfare')
 win.fill((green))
 
 radius = 20
@@ -393,15 +514,21 @@ right_key = pygame.K_d
 up_key = pygame.K_w
 down_key = pygame.K_s
 
+# chop_sound = pygame.mixer.Sound("chop.wav")
+# step_sound = pygame.mixer.Sound("./step.wav")
+#
+# def chop():
+#     ####################################
+#     pygame.mixer.Sound.play(chop_sound)
+#     pygame.mixer.music.stop()
+#
+# def step():
+#     pygame.mixer.Sound.play(step_sound)
+#     pygame.mixer.music.stop()
+
         
-trees = []
-
-for i in range(50):
-                    tree1_pos = (random.randint(-400, 400), random.randint(-500, 500))
-                    new_tree = Tree(tree1_pos, 500)
-                    if not new_tree.is_colliding(player.coord(), radius):
-                            trees.append(new_tree)
-
+world = Map()
+world.generate()
 
 
 zombies = pygame.sprite.Group()
@@ -514,9 +641,10 @@ while run:
             if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 map_pos = player.map_coord(mouse_pos)
-                for tree in trees:
+                for tree in world.trees:
                     if tree.is_chopped(map_pos):
                         print('chop')
+                        # chop()
                         if tree.fallen:
                             fallen_trees += 1
                             max_speed -= 5
@@ -551,12 +679,13 @@ while run:
         movement = ','.join([movement, 'down'])
     new_pos = player.new_pos(movement)
     any_collisions = False
-    for tree in trees:
+    for tree in world.trees:
         if tree.is_colliding(new_pos, player.r):
             any_collisions = True
             break
     if not any_collisions:
         player.move_to(new_pos)
+        # step()
 
     dead_zombies = []
     for zombie in zombies:
@@ -571,7 +700,7 @@ while run:
         level= input('level:\n')
         player.armour(level)
 
-
+    world.draw(win, player)
 
     player.hit_chance.clear()
     player.hit_chance.append('hit')
