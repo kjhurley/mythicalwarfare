@@ -439,8 +439,15 @@ class Biome:
         return HexagonGeometery.is_in_unithex(unit_pos)
 
     def does_biome_need_to_be_drawn(self, player: Player):
-        """check if biome needs to be drawn"""
-        return self._is_pos_in_biome(player.coord(), player.r)
+        """check if biome needs to be drawn
+
+        if biome center is within screen width of player then draw it
+        """
+        if -SCREEN_MAX_X < self.centre[0] - player.x < SCREEN_MAX_X:
+            if -SCREEN_MAX_Y < self.centre[1] - player.y < SCREEN_MAX_Y:
+                return True
+        return False
+
 
     def draw(self, win: pygame.Surface, player: Player):
         """draw the biome around the player onto the surface"""
