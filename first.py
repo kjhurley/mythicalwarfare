@@ -19,6 +19,9 @@ import random
 import time
 from math import sqrt
 
+SCREEN_MAX_X = 500
+SCREEN_MAX_Y = 500
+
 
 pygame.init()
 pygame.font.init()
@@ -123,49 +126,6 @@ class Button:
 
 
 
-class Biome:
-    def __init__(self, biome_pos):
-        self.size= random.randint(1000, 10000)
-        self.terrain= random.choice('rock', 'grass')
-        self.vegitation= (True)
-    def conditions(self):
-        if self.terrain== ('rock'):
-            self.vegitation= (False)
-        if self.terrain== ('grass'):
-            self.vegitation= (True)
-    def generate(self):
-        if self.vegitation== True:
-            biome_type= random.choice('plains', 'forest', 'lake')
-        if self.vegitation== False:
-            biome_type= random.choice('mountins', 'desert')
-        if biome_type== ('forest'):
-            trees = []
-            for i in range(self.size):
-                    tree1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-                    new_tree = Tree(tree1_pos, self.size)
-                    if not new_tree.is_colliding(player.coord(), radius):
-                            trees.append(new_tree)
-            rocks = []
-            for i in range(1000):
-                    rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-                    new_rock = Rock(rock1_pos, 5)
-                    if not new_rock.is_colliding(player.coord(), radius):
-                            rocks.append(new_rock)
-            for tree in trees:
-                tree.draw(win, player)
-            for rock in rocks:
-                rock.draw(win, player)
-        if biome_type== ('plains'):
-            rocks = []
-            for i in range(1000):
-                    rock1_pos = (random.randint(-self.size, self.size), random.randint(-self.size, self.size))
-                    new_rock = Rock(rock1_pos, 5)
-                    if not new_rock.is_colliding(player.coord(), radius):
-                            rocks.append(new_rock)
-            for rock in rocks:
-                rock.draw(win, player)
-
-
 
 
 
@@ -173,7 +133,7 @@ armour_durb= 100
 
 
 class Player:
-    def __init__(self, pos, radius, velocity=5, screen_size=(500,500)):
+    def __init__(self, pos, radius, velocity=5, screen_size=(SCREEN_MAX_X, SCREEN_MAX_Y)):
         self.x = pos[0]
         self.y = pos[1]
         self.r = radius
@@ -358,15 +318,13 @@ class Rock(Tree):
     def draw(self, win, player):
         screen_x, screen_y = player.screen_coord((self.x, self.y))
 
-        if not self.fallen:
-            pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
+        if (0 < screen_x < SCREEN_MAX_X) and (0 < screen_y < SCREEN_MAX_Y):
+            if not self.fallen:
+                pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
 
     def is_colliding(self, pos, radius):
         """True if circle at pos of given radius is touching"""
-        if self.overlaps(pos, radius + self.r):
-            return True
-        else:
-            return False
+        return self.overlaps(pos, radius + self.r)
 
     def is_chopped(self, click_pos):
         """rocks cant be chopped"""
@@ -390,117 +348,180 @@ class Lake(Tree):
         if self.overlaps(pos, radius + self.r):
             return True
         else:
+
             return False
 
     def is_chopped(self, click_pos):
         """lakes cant be chopped"""
         return False
 
-vectors = [(-1.,0),(.5,sqrt(3.)/2.),(.5,-sqrt(3.)/2.)]
 
-def randinunithex():
-    x = random.randrange(3)
-    (v1,v2) = (vectors[x], vectors[(x+1)%3])
-    (x,y) = (random.random(), random.random())
-    return (x*v1[0]+y*v2[0],x*v1[1]+y*v2[1])
+class HexagonGeometery:
+    SQRT_3_OVER_2 = sqrt(3.) / 2.
+
+    vectors = [(-1.,0),(.5, SQRT_3_OVER_2),(.5,-SQRT_3_OVER_2)]
+
+    @classmethod
+    def randinunithex(cls):
+        x = random.randrange(3)
+        (v1,v2) = (cls.vectors[x], cls.vectors[(x+1)%3])
+        (x,y) = (random.random(), random.random())
+        return (x*v1[0]+y*v2[0],x*v1[1]+y*v2[1])
+
+    @classmethod
+    def hexagon_tiler(cls, start, hex_size, num_hexagons):
+        """fill a map space using hexagons"""
+        central_pos = start
+        neighbour_count = 0
+        diameter = hex_size
+
+        # offset
+        new_pos = start
+
+        # spiral list of new centres around the starting point
+        neighbours = [(0, 1), (cls.SQRT_3_OVER_2, 0.5), (cls.SQRT_3_OVER_2, -0.5),
+                      (0, -1), (-cls.SQRT_3_OVER_2, 0.5), (-cls.SQRT_3_OVER_2, -0.5)]
+
+        next_6 = [(diameter * x, diameter * y) for (x, y) in neighbours]
+
+        while num_hexagons > 0:
+            new_pos = next_6.pop()
+
+            yield new_pos
+            if not next_6:
+                diameter += hex_size
+                next_6 = [(diameter * x, diameter * y) for (x, y) in neighbours]
+            num_hexagons -= 1
+
+    @classmethod
+    def is_in_unithex(cls, pos):
+        """return True if pos (x, y) is within a unit hexagon centred on 0,0
+
+        """
+
+        x, y = pos
+        l2 = x * x + y * y
+        if l2 > 1.0:
+            return False
+        if l2 < 0.75:
+            return True
+
+        px = x / cls.SQRT_3_OVER_2
+        if (px > 1.0 or px < -1.0):
+            return False
+
+        py = 0.5 * px + y
+        if py > 1.0 or py < -1.0:
+            return False
+
+        if (px - py > 1.0) or (px - py < -1.0):
+            return False
+
+        return True
 
 
 class Biome:
-    SIZE = 1000
-    NUM_TERRAIN_THINGS = 500 # eg 500 things selected from trees, rocks, lakes
-    def __init__(self, centre):
+    DIAMETER = 500
+    def __init__(self, centre, terrain_types, terrain_choices, size=None, num_terrain_things=50):
         self.centre = centre
-        self.terrain_choice = ['tree'] * 5 + ['rock'] * 15 + ['lake'] * 1
-        self.terrain_class = {
-            'tree': Tree,
-            'rock': Rock,
-            'lake': None
-        }
+        assert all(t_type in terrain_types for t_type in terrain_choices)
+        self.terrain_choice = terrain_choices
+        self.terrain_types = terrain_types
+        self.size = size or self.DIAMETER
+        self.num_terrain_things = num_terrain_things
+
+        self.terrains = {t_type: [] for t_type in self.terrain_types}
+
+    def _is_pos_in_biome(self, pos, radius):
+        """True if pos overlaps with this biome """
+        relative_pos = (pos[0] - self.centre[0], pos[1] - self.centre[1])
+        unit_pos = (2*relative_pos[0] / self.size, 2*relative_pos[1] / self.size)
+        return HexagonGeometery.is_in_unithex(unit_pos)
+
+    def does_biome_need_to_be_drawn(self, player: Player):
+        """check if biome needs to be drawn"""
+        return self._is_pos_in_biome(player.coord(), player.r)
+
+    def draw(self, win: pygame.Surface, player: Player):
+        """draw the biome around the player onto the surface"""
+        if self.does_biome_need_to_be_drawn(player):
+            for t_type in self.terrains.keys():
+                for t in self.terrains[t_type]:
+                    t.draw(win, player)
 
     def random_in_hex(self):
         """generate random x,y within the biome hexagon"""
-        pos = randinunithex()
-        pos = pos[0] * self.SIZE, pos[1] * self.SIZE
+        pos = HexagonGeometery.randinunithex()
+        pos = pos[0] * self.size, pos[1] * self.size
         return (int(self.centre[0] + pos[0]), int(self.centre[1] + pos[1]))
 
     def fill(self, map):
         """biome fills map with stuff like trees, rocks, lakes"""
-
-
         creation_order = []
         # create a bunch of terrain features eg rocks, trees etc
-        for _ in range(self.NUM_TERRAIN_THINGS):
+        for _ in range(self.num_terrain_things):
             creation_order.append(random.choice(self.terrain_choice))
 
-        for t in creation_order:
-            if t == 'rock':
-                pos = self.random_in_hex()
-                new_rock = Rock(pos)
-                if not new_rock.is_colliding(player.coord(), player.r):
-                    map.rocks.append(new_rock)
-        for t in creation_order:
-            if t == 'tree':
-                pos = self.random_in_hex()
-                new_tree = Tree(pos)
-                if not new_tree.is_colliding(player.coord(), player.r):
-                    map.trees.append(new_tree)
-        for t in creation_order:
-            if t == 'lake':
-                pos = self.random_in_hex()
-                new_lake = Lake(pos)
-                if not new_lake.is_colliding(player.coord(), player.r):
-                    map.lakes.append(new_lake)
+        for t_type in self.terrain_types:
+            for t in creation_order:
+                if t == t_type:
+                    pos = self.random_in_hex()
+                    new_terrain = t_type(pos)
+                    if not new_terrain.is_colliding(player.coord(), player.r):
+                        self.terrains[t_type].append(new_terrain)
+
+    def is_colliding(self, pos, radius):
+        """True if circle at pos of given radius is touching something
+
+        First check that pos
+        """
+        if self._is_pos_in_biome(pos, radius):
+            for t_type in self.terrain_types:
+                for t in self.terrains[t_type]:
+                    if t.is_colliding(pos, radius):
+                        return True
+            return False
+
+class Forest(Biome):
+    def __init__(self, centre):
+        choices = [Rock] * 15 + [Tree] * 5 + [Lake]
+        super().__init__(centre, terrain_types=[Rock, Tree, Lake], terrain_choices=choices)
 
 
-def hexagon_tiler(start, hex_size, num_hexagons):
-    """fill a map space using hexagons"""
-    central_pos = start
-    neighbour_count = 0
-    diameter = hex_size
+class Swamp(Biome):
+    def __init__(self, centre):
+        super().__init__(centre, [Rock, Lake], [Rock] * 10 + [Lake] * 5, num_terrain_things=200)
 
-    # offset
-    new_pos = start
 
-    while num_hexagons > 0:
-        yield new_pos
-        num_hexagons -= 1
 
 
 class Map:
     """tracks all the biomes etc"""
-    NUM_BIOMES = 1
-    BIOME_SIZE = 500 # biomes are hexagons - this is the diameter of a hexagon
+    NUM_BIOMES = 7
 
     def __init__(self):
         self.biomes = []
-        self.trees = []
-        self.rocks = []
-        self.lakes = []
 
     def draw(self, win: pygame.Surface, player: Player):
         """draw part of the map around the player onto the surface"""
-        for r in self.rocks:
-            r.draw(win, player)
-        for t in self.trees:
-            t.draw(win, player)
-        for l in self.lakes:
-            l.draw(win, player)
+        for b in self.biomes:
+            b.draw(win, player)
 
     def generate(self):
         """fill the map with biomes"""
         biome_count = self.NUM_BIOMES
-        self.biomes.append(Biome((0,0)))
+        self.biomes.append(Forest((0,0)))
         biome_count -= 1
-        for center in hexagon_tiler((0, 0), self.BIOME_SIZE, biome_count):
-            self.biomes.append(Biome(center))
+        for center in HexagonGeometery.hexagon_tiler((0, 0), Biome.DIAMETER, biome_count):
+            self.biomes.append(Swamp(center))
 
         for b in self.biomes:
             b.fill(self)
 
 
 pygame.init()
-max_x = 500
-max_y = 500
+max_x = SCREEN_MAX_X
+max_y = SCREEN_MAX_Y
 win = pygame.display.set_mode((max_x, max_y))
 green = (0,122,0)
 pygame.display.set_caption('mythical warfare')
@@ -641,17 +662,19 @@ while run:
             if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 map_pos = player.map_coord(mouse_pos)
-                for tree in world.trees:
-                    if tree.is_chopped(map_pos):
-                        print('chop')
-                        # chop()
-                        if tree.fallen:
-                            fallen_trees += 1
-                            max_speed -= 5
-                            if fallen_trees == 1:
-                                print("TIMBER! That's %d tree." % fallen_trees)
-                            else:
-                                print("TIMBER! That's %d trees." % fallen_trees)
+                for b in world.biomes:
+                    if Tree in b.terrains:
+                        for tree in b.terrains[Tree]:
+                            if tree.is_chopped(map_pos):
+                                print('chop')
+                                # chop()
+                                if tree.fallen:
+                                    fallen_trees += 1
+                                    max_speed -= 5
+                                    if fallen_trees == 1:
+                                        print("TIMBER! That's %d tree." % fallen_trees)
+                                    else:
+                                        print("TIMBER! That's %d trees." % fallen_trees)
 
                 for zombie in zombies:
                     if zombie.rect.collidepoint(pygame.mouse.get_pos()):
@@ -679,8 +702,8 @@ while run:
         movement = ','.join([movement, 'down'])
     new_pos = player.new_pos(movement)
     any_collisions = False
-    for tree in world.trees:
-        if tree.is_colliding(new_pos, player.r):
+    for b in world.biomes:
+        if b.is_colliding(new_pos, player.r):
             any_collisions = True
             break
     if not any_collisions:
