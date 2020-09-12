@@ -25,7 +25,7 @@ SCREEN_MAX_Y = 500
 
 pygame.init()
 pygame.font.init()
-pygame.mixer.init()
+# pygame.mixer.init()
 
 
 font= pygame.font.SysFont(None, 25)
