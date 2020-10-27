@@ -324,7 +324,7 @@ class Rock(Tree):
 
     def is_colliding(self, pos, radius):
         """True if circle at pos of given radius is touching"""
-        return self.overlaps(pos, radius + self.r)
+        return False
 
     def is_chopped(self, click_pos):
         """rocks cant be chopped"""
@@ -339,9 +339,9 @@ class Lake(Tree):
 
     def draw(self, win, player):
         screen_x, screen_y = player.screen_coord((self.x, self.y))
-
-        if not self.fallen:
-            pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
+        if (0 < screen_x < SCREEN_MAX_X) and (0 < screen_y < SCREEN_MAX_Y):
+            if not self.fallen:
+                pygame.draw.circle(win, self.COLOUR, (screen_x, screen_y), self.r)
 
     def is_colliding(self, pos, radius):
         """True if circle at pos of given radius is touching"""
@@ -421,7 +421,7 @@ class HexagonGeometery:
 
 
 class Biome:
-    DIAMETER = 500
+    DIAMETER = 1000
     def __init__(self, centre, terrain_types, terrain_choices, size=None, num_terrain_things=50):
         self.centre = centre
         assert all(t_type in terrain_types for t_type in terrain_choices)
@@ -443,10 +443,13 @@ class Biome:
 
         if biome center is within screen width of player then draw it
         """
+        return True
+
         if -SCREEN_MAX_X < self.centre[0] - player.x < SCREEN_MAX_X:
             if -SCREEN_MAX_Y < self.centre[1] - player.y < SCREEN_MAX_Y:
                 return True
-        return False
+        else:
+            return False
 
 
     def draw(self, win: pygame.Surface, player: Player):
@@ -487,7 +490,7 @@ class Biome:
                 for t in self.terrains[t_type]:
                     if t.is_colliding(pos, radius):
                         return True
-            return False
+        return False
 
 class Forest(Biome):
     def __init__(self, centre):
@@ -497,9 +500,12 @@ class Forest(Biome):
 
 class Swamp(Biome):
     def __init__(self, centre):
-        super().__init__(centre, [Rock, Lake], [Rock] * 10 + [Lake] * 5, num_terrain_things=200)
+        super().__init__(centre, [Lake], [Lake], num_terrain_things=500)
 
 
+class Grassland(Biome):
+    def __init__(self, centre):
+        super().__init__(centre, [Rock], [Rock], num_terrain_things=2000)
 
 
 class Map:
@@ -517,7 +523,7 @@ class Map:
     def generate(self):
         """fill the map with biomes"""
         biome_count = self.NUM_BIOMES
-        self.biomes.append(Forest((0,0)))
+        self.biomes.append(Grassland((0,0)))
         biome_count -= 1
         for center in HexagonGeometery.hexagon_tiler((0, 0), Biome.DIAMETER, biome_count):
             self.biomes.append(Swamp(center))
