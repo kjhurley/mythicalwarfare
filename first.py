@@ -649,16 +649,7 @@ while run:
             run = False
         if event.type == pygame.K_t:
             command= input('command:\n')
-        if event.type == pygame.K_ESCAPE:
-                pause= True
-                while pause:
-                    button.click()
-                    if button.clicked:
-                        run= False
-                        pause= False
-                    button.draw()
-                    button.message('quit')
-                    pygame.time.delay(10)
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4: # mouse wheel up
                 if player.v < max_speed:
