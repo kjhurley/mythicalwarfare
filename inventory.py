@@ -4,6 +4,28 @@ import pygame
 SCREEN_MAX_X = 500
 SCREEN_MAX_Y = 500
 
+class Item:
+    def __init__(self, name, max_number=64):
+        self.amount = 1
+        self.name = name
+        self.max_number = max_number
+
+    def add_more(self):
+        """increase the count - don't add more if you already have max"""
+        if self.amount < self.max_number:
+            self.amount += 1
+            return True
+        else:
+            return False
+
+    def remove(self):
+        """drop it"""
+        if self.amount > 0:
+            self.amount -= 1
+            return True
+        else:
+            return False
+
 class Inventory:
     NUM_BELT_ITEMS = 4
     def __init__(self):
@@ -18,8 +40,12 @@ class Inventory:
         if self.main_hand is None:
             self.main_hand = thing
             return True
+        elif self.main_hand.add_more():
+            return True
         elif self.other_hand is None:
             self.other_hand = thing
+            return True
+        elif self.other_hand.add_more():
             return True
         else:
             return False
@@ -30,12 +56,14 @@ class Inventory:
         :return dropped thing or None if nothing to drop
         """
         dropped = None
-        if self.main_hand:
-            dropped = self.main_hand
-            self.main_hand = None
-        elif self.other_hand:
-            dropped = self.other_hand
-            self.other_hand = None
+        if self.main_hand.remove():
+            removeped = self.main_hand
+            if self.main_hand.amount == 0:
+                self.main_hand = None
+        elif self.other_hand.remove():
+            removeped = self.other_hand
+            if self.other_hand.amount == 0:
+                self.other_hand = None
         return dropped
 
     def put_from_main_hand_to_belt(self):
@@ -64,7 +92,7 @@ colour_of_item = {
 
 
 class ScreenInventory:
-    def __init__(self, inventory: Inventory):
+    def __init__(self, inventory: Inventory, font):
         self.inventory = inventory
         self.rects = {'main_hand': None, 'other_hand': None}
         self.rects.update({f'belt{i}': None for i in range(inventory.NUM_BELT_ITEMS)})
@@ -74,17 +102,23 @@ class ScreenInventory:
         self.large_width = 50
         self.narrow_width = 25
 
-    def colour_of_contents(self, contents):
+        self.font = font
+
+    def message_to_screen(self, win, msg, color, pos):
+        screen_text = self.font.render(msg, True, color)
+        win.blit(screen_text, (pos))
+
+    def colour_of_contents(self, contents: Item):
         if contents is not None:
-            if contents in colour_of_item:
-                colour = colour_of_item[contents]
+            if contents.name in colour_of_item:
+                colour = colour_of_item[contents.name]
             else:
                 colour = pygame.Color('black')
         else:
             colour = (255, 255, 255)
         return colour
 
-    def draw_a_slot(self, win, top_left_x, top_left_y, width, contents):
+    def draw_a_slot(self, win, top_left_x, top_left_y, width, contents: Item):
         # first draw large rect in black, then slightly smaller inside in white
         pygame.draw.rect(win, (0, 0, 0), (top_left_x, top_left_y, width, width))
         colour = self.colour_of_contents(contents)
@@ -92,6 +126,8 @@ class ScreenInventory:
                                        top_left_y + self.border_width,
                                        width - 2 * self.border_width,
                                        width - 2 * self.border_width))
+        if contents is not None:
+            self.message_to_screen(win, str(contents.amount), (0,0,0), (top_left_x + self.border_width, top_left_y + self.border_width))
         return r
 
     def handle_click(self, mouse_pos):
@@ -103,7 +139,8 @@ class ScreenInventory:
         rects_to_inv.update({f'belt{i}': self.inventory.belt[i] if i < len(self.inventory.belt) else None for i in range(self.inventory.NUM_BELT_ITEMS)})
         for k in rects_to_inv:
             if self.rects[k].collidepoint(mouse_pos):
-                print(rects_to_inv[k])
+                if rects_to_inv[k] is not None:
+                    print(rects_to_inv[k].name, rects_to_inv[k].amount)
 
     def draw(self, win):
         # large slots at top - main hand + other hand
@@ -129,21 +166,22 @@ class ScreenInventory:
             y += self.narrow_width + self.spacing
 
 def actions(inventory):
-    inventory.pick_up('apple')
+    inventory.pick_up(Item('apple'))
     yield
-    inventory.pick_up('sword')
+    inventory.pick_up(Item('sword'))
     yield
     inventory.put_down()
     yield
-    inventory.pick_up('bread')
+    bread = Item('bread')
+    inventory.pick_up(bread)
     yield
     inventory.put_from_main_hand_to_belt()
     yield
     inventory.put_from_other_hand_to_belt()
     yield
-    inventory.pick_up('tree')
+    inventory.pick_up(Item('tree'))
     yield
-    inventory.pick_up('bread')
+    inventory.pick_up(bread)
     yield
     inventory.put_down()
 
@@ -169,7 +207,7 @@ def main():
 
     inventory = Inventory()
 
-    scr_inv = ScreenInventory(inventory)
+    scr_inv = ScreenInventory(inventory, font)
 
     g = actions(inventory)
 
